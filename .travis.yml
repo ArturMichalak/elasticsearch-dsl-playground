@@ -1,0 +1,11 @@
+language: python
+python: 
+  - "3.8"
+install:
+  - pip install -r requirements.txt
+  - pip install coverage==4.5.4
+cache: pip
+script:
+  - py.test search --doctest-modules --pep8 search -v --cov search --cov-report xml:coverage.xml
+after_success:
+  - coveralls
