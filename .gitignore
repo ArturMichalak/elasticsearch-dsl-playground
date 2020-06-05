@@ -134,3 +134,4 @@ dmypy.json
 .travis.json
 
 *_old.py
+app.py

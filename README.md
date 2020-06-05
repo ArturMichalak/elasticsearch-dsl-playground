@@ -4,4 +4,4 @@
 
 Example of use of ElasticSearch-DSL in python
 
-__generate coverage report__: `py.test search --doctest-modules --pep8 search -v --cov search --cov-report xml:coverage.xml`
+__generate coverage report__: `py.test search --doctest-modules --pylint search -v --cov search --cov-report xml:coverage.xml`

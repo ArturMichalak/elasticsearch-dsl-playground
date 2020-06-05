@@ -7,6 +7,6 @@ install:
   - pip install coverage==4.5.4
 cache: pip
 script:
-  - py.test search --doctest-modules --pep8 search -v --cov search --cov-report xml:coverage.xml
+  - py.test search --doctest-modules --pylint search -v --cov search --cov-report xml:coverage.xml
 after_success:
   - coveralls

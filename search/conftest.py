@@ -1,39 +1,40 @@
-import os
-
-from elasticsearch_dsl.connections import connections, add_connection
-
-from pytest import fixture
+"""Basic test configuration"""
 from unittest.mock import MagicMock
+from pytest import fixture
+
+from elasticsearch_dsl.connections import add_connection
 
 
 @fixture
 def mock_client(dummy_response):
+    """Returns elasticsearch mock client"""
+
     client = MagicMock()
     client.search.return_value = dummy_response
-    add_connection('mock', client)
+    add_connection("mock", client)
     yield client
-    connections._conn = {}
-    connections._kwargs = {}
 
 
-@fixture
-def dummy_response():
+@fixture(name="dummy_response")
+def fixture_dummy_response():
+    """Returns the dictionary for comparison in tests"""
+
     return {
-        '_shards': {
-            'failed': 0,
-            'successful': 10,
-            'total': 10
+        "_shards": {
+            "failed": 0,
+            "successful": 10,
+            "total": 10
         },
-        'hits': {
-            'hits': [
+        "hits": {
+            "hits": [
                 {
-                    '_index': 'blog',
-                    '_type': '_doc',
-                    '_id': '1',
-                    '_score': '10.114',
-                    '_source': {
-                        'title': 'Test elasticsearch',
-                        'body': '''
+                    "_index": "blog",
+                    "_type": "_doc",
+                    "_id": "1",
+                    "_score": "10.114",
+                    "_source": {
+                        "title": "Test elasticsearch",
+                        "body": """
 Litwo! Ojczyzno moja! Ty jesteś jak zdrowie. Ile cię stracił.
 Dziś człowieka nie policzę.
 Opuszczali rodziców i jeszcze dobrze
@@ -66,26 +67,23 @@ wzrostem dorodniejsza bo tak pan Wojski na nim ją w ulicę się tajemnie,
 Turka czy wstydzić, czy na lewo,
 on rodaków zbiera się w domu dostatek mieszka i panien
 nie w nieczynności! a Suwarów w posiadłość.
-                        ''',
-                        'published_from': '2013-02-10T10:31:07.851688',
-                        'tags': [
-                            'g1',
-                            'g2'
-                        ],
-                        'lines': '1'
+                        """,
+                        "published_from": "2013-02-10T10:31:07.851688",
+                        "tags": ["g1", "g2"],
+                        "lines": "1",
                     },
-                    'highlight': {
-                        'title': ['<em>Test</em> elasticsearch']
-                    }
+                    "highlight": {
+                        "title": ["<em>Test</em> elasticsearch"]
+                    },
                 },
                 {
-                    '_index': 'blog',
-                    '_type': '_doc',
-                    '_id': '2',
-                    '_score': '12.0',
-                    '_source': {
-                        'title': 'Test elasticsearch numer 2',
-                        'body': '''
+                    "_index": "blog",
+                    "_type": "_doc",
+                    "_id": "2",
+                    "_score": "12.0",
+                    "_source": {
+                        "title": "Test elasticsearch numer 2",
+                        "body": """
 Litwo! Ojczyzno moja! Ty jesteś jak zdrowie. Ile cię stracił.
 Dziś człowieka nie policzę.
 Opuszczali rodziców i jeszcze dobrze
@@ -118,20 +116,17 @@ wzrostem dorodniejsza bo tak pan Wojski na nim ją w ulicę się tajemnie,
 Turka czy wstydzić, czy na lewo,
 on rodaków zbiera się w domu dostatek mieszka i panien
 nie w nieczynności! a Suwarów w posiadłość.
-                        ''',
-                        'published_from': '2014-02-10T10:31:07.851688',
-                        'tags': [
-                            'g1',
-                            'g2'
-                        ],
-                        'lines': '1'
+                        """,
+                        "published_from": "2014-02-10T10:31:07.851688",
+                        "tags": ["g1", "g2"],
+                        "lines": "1",
                     },
-                    'highlight': {
-                        'title': ['<em>Test</em> elasticsearch numer 2']
-                    }
+                    "highlight": {
+                        "title": ["<em>Test</em> elasticsearch numer 2"]
+                    },
                 },
             ]
         },
         "timed_out": False,
-        "took": 123
+        "took": 123,
     }

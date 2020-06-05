@@ -1,43 +1,35 @@
-from copy import deepcopy
-from datetime import datetime
-from pytz import timezone, utc
+"""import os
+import string
+import random
+from datetime import datetime, timedelta
+from elasticsearch_dsl.connections import connections
+from search.doc_app import Article
 
-from elasticsearch_dsl import Text, Keyword, Date, Integer, Document
-from elasticsearch_dsl.exceptions import IllegalOperation
-from elasticsearch_dsl.connections import connections, add_connection
+connections.create_connection(hosts=[os.getenv('ELASTIC7', 'localhost:9200')])
 
-from pytest import fixture
+Article.init()
 
+idindex = 0
+for i in range(0, 20):
+    for j in range(0, 500):
+        title = ''.join(
+            random.choice(string.ascii_uppercase) for x in range(8))
+        body = ''.join(
+            random.choice(string.ascii_uppercase) for x in range(999))
+        article = Article(
+            meta={'id': idindex},
+            title=f'{title}-{i}-{j}',
+            body=body,
+            published_from=datetime.now() + timedelta(days=int(f'{i}{j}')),
+            tags=[
+                random.choice(['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'])
+            ])
+        idindex = idindex + 1
+        article.save()
 
-class Article(Document):
-    title = Text(analyzer='snowball', fields={'raw': Keyword()})
-    author = Text(analyzer='snowball')
-    body = Text(analyzer='snowball')
-    tags = Keyword()
-    published_from = Date()
-    lines = Integer()
+print('-id-43-article-')
 
-    def to_dict(self, include_meta=False, skip_empty=True):
-        self.title = ' '.join(self.title.split())\
-            if self.title else self.title
-        self.author = ' '.join(self.author.split())\
-            if self.author else self.author
-        self.body = ' '.join(self.body.strip().split(' '))\
-            if self.body else self.body
-        self.published_from = self.published_from.isoformat()\
-            .replace('+00:00', 'Z')\
-            if self.published_from else self.published_from
-        self.lines = len(self.body.strip().split('\n')) if self.body else 0
-        return super(Article, self).to_dict(include_meta, skip_empty)
-
-    class Index:
-        name = 'blog'
-        settings = {
-          'number_of_shards': 2,
-        }
-
-    def save(self, ** kwargs):
-        return super(Article, self).save(** kwargs)
-
-    def is_published(self):
-        return datetime.now(utc) >= self.published_from
+article = Article.get(id=43)
+print(article.is_published())
+print(article.toJson())
+"""

@@ -1,0 +1,146 @@
+from datetime import datetime, timedelta
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Document, Date, Integer, Keyword, Text, FacetedSearch, TermsFacet, DateHistogramFacet, Search, UpdateByQuery, Index
+from elasticsearch_dsl.connections import connections
+import string
+import random
+import json
+import os
+
+connections.create_connection(hosts=[os.getenv('ELASTIC7', 'localhost:9200')])
+
+index = Index('blog')
+
+
+@index.document
+class Article(Document):
+    title = Text(analyzer='snowball', fields={'raw': Keyword()})
+    body = Text(analyzer='snowball')
+    tags = Keyword()
+    published_from = Date()
+    lines = Integer()
+
+    def toJson(self):
+        def lamb(self, o):
+            o['published_from'] = o['published_from'].strftime(
+                '%d.%M.%Y') if 'published_from' in o else None
+            return o
+
+        return json.dumps(self,
+                          default=lambda o: lamb(self, o).__dict__,
+                          sort_keys=True,
+                          indent=4)
+
+    class Index:
+        name = 'blog'
+        settings = {
+            "number_of_shards": 2,
+        }
+
+    def save(self, **kwargs):
+        self.lines = len(self.body.split())
+        return super(Article, self).save(**kwargs)
+
+    def is_published(self):
+        return datetime.now() >= self.published_from
+
+
+class BlogSearch(FacetedSearch):
+    doc_types = [
+        Article,
+    ]
+    fields = ['tags', 'title', 'body']
+    facets = {
+        'tags':
+        TermsFacet(field='tags'),
+        'publishing_frequency':
+        DateHistogramFacet(field='published_from', interval='month')
+    }
+
+    def search(self):
+        s = super().search()
+        return s.query("match_phrase_prefix", title="XF")
+
+
+"""
+Article.init()
+
+idindex = 0
+for i in range(0,20):
+    for j in range(0,500):
+        title = ''.join(random.choice(string.ascii_uppercase) for x in range(8))
+        body = ''.join(random.choice(string.ascii_uppercase) for x in range(999))
+        article = Article(
+            meta={'id': idindex}, 
+            title=f'{title}-{i}-{j}', 
+            body=body, 
+            published_from=datetime.now() + timedelta(days=int(f'{i}{j}')), 
+            tags=[random.choice(['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'])]
+        )
+        idindex = idindex + 1
+        article.save()
+"""
+
+bs = BlogSearch()
+response = bs.execute()
+
+for hit in response:
+    print(hit.meta.score, hit.title)
+    for tag in hit.tags:
+        print(tag)
+"""
+print('---------')
+
+for hit in index.search().scan():
+    print(f'{hit.meta.id} {hit.title}')
+
+
+print('---------')
+
+s = index.search().query("match_phrase_prefix", title="TNX")
+response = s.execute()
+
+for hit in s.scan():
+    print(hit.title)
+
+print('---------')
+
+for item in response:
+    print(item.title)
+
+print('=========')
+
+index_label = 'xd'
+
+
+if not client.indices.exists(index_label):
+    index = Index(index_label)
+    index.document(Article)
+    index.create()
+
+ubq = UpdateByQuery()).using(client).query("match", title="T").exclude("match",title='N').script(source="ctx._source.likes++", lang="painless")
+response = ubq.execute()
+
+print('/----------\\')
+
+for hit in response:
+    print(hit.meta.score, hit.title)
+
+print('------------')
+
+for (tag, count, selected) in response.facets.tags:
+    print(tag, ' (SELECTED):' if selected else ':', count)
+
+print('------------')
+
+for (month, count, selected) in response.facets.publishing_frequency:
+    print(month.strftime('%B %Y'), ' (SELECTED):' if selected else ':', count)
+"""
+
+print('-id-43-article-')
+
+article = Article.get(id=9999)
+print(article.is_published())
+print(article.toJson())
+
+# print(connections.get_connection().cluster.health())
